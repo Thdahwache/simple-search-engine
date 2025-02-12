@@ -1,0 +1,24 @@
+course_qa_system/
+├── requirements.txt
+├── README.md
+├── src/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── elastic/
+│   │   ├── __init__.py
+│   │   ├── client.py
+│   │   └── indexer.py
+│   ├── rag/
+│   │   ├── __init__.py
+│   │   ├── templates.py
+│   │   └── qa_bot.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── logger.py
+│   └── web/
+│       ├── __init__.py
+│       └── app.py
+└── data/
+    └── input/
+        └── faqs/
+            └── documents.json 

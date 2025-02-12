@@ -11,6 +11,7 @@ dependencies = [
     "openai>=1.61.1",
     "pandas>=2.2.3",
     "requests>=2.32.3",
+    "ruff>=0.9.6",
     "scikit-learn>=1.6.1",
     "streamlit>=1.42.0",
     "torch>=2.6.0",

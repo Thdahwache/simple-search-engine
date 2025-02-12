@@ -1,0 +1,9 @@
+# Core dependencies
+elasticsearch>=8.4.3
+openai>=1.0.0
+streamlit>=1.29.0
+tqdm>=4.66.0
+
+# Development dependencies
+python-dotenv>=1.0.0  # for environment variable management
+requests>=2.31.0      # for HTTP requests 
