@@ -3,7 +3,7 @@
 .PHONY: all install install-uv run clean test lint elastic-docker elastic-check index dev
 
 # Default target
-all: install elastic-docker index
+all: install-uv elastic-docker index
 
 # Install dependencies with pip (default)
 install:
@@ -48,13 +48,50 @@ elastic-docker:
 # Check Elasticsearch status
 elastic-check:
 	@echo "Checking Elasticsearch status..."
-	@if curl -s "http://localhost:9200/_cluster/health" >/dev/null; then \
-		echo "Elasticsearch is running"; \
-	else \
-		echo "Elasticsearch is not running. Start it with:"; \
+	@# Check if Elasticsearch is running
+	@if ! curl -s "http://localhost:9200/_cluster/health" >/dev/null; then \
+		echo "❌ Elasticsearch is not running. Start it with:"; \
 		echo "make elastic-docker"; \
 		exit 1; \
 	fi
+	@echo "✅ Elasticsearch is running"
+	
+	@# Check cluster health
+	@health=$$(curl -s "http://localhost:9200/_cluster/health" | grep -o '"status":"[^"]*"' | cut -d'"' -f4); \
+	if [ "$$health" = "red" ]; then \
+		echo "❌ Cluster health is red - there are serious issues"; \
+		exit 1; \
+	elif [ "$$health" = "yellow" ]; then \
+		echo "⚠️  Cluster health is yellow - this is normal for single-node development clusters"; \
+	else \
+		echo "✅ Cluster health is green"; \
+	fi
+	
+	@# Check indices
+	@if ! curl -s "http://localhost:9200/_cat/indices?v" | grep -q "course-questions"; then \
+		echo "❌ Index 'course-questions' does not exist"; \
+		echo "Run 'make index' to create and populate the index"; \
+		exit 1; \
+	fi
+	@echo "✅ Index 'course-questions' exists"
+	
+	@# Check document count
+	@doc_count=$$(curl -s "http://localhost:9200/course-questions/_count" | grep -o '"count":[0-9]*' | cut -d':' -f2); \
+	if [ "$$doc_count" -eq 0 ]; then \
+		echo "❌ Index is empty (0 documents)"; \
+		echo "Run 'make index' to populate the index"; \
+		exit 1; \
+	fi
+	@echo "✅ Index contains $$doc_count documents"
+	
+	@# Check mapping
+	@if ! curl -s "http://localhost:9200/course-questions/_mapping" | grep -q "keyword"; then \
+		echo "⚠️  Warning: Index mapping might not be optimal - missing keyword fields"; \
+	else \
+		echo "✅ Index mapping includes keyword fields"; \
+	fi
+	
+	@echo "\n✨ All Elasticsearch checks passed successfully!"
 
 # Stop Elasticsearch Docker container
 elastic-stop:

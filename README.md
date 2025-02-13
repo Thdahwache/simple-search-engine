@@ -66,6 +66,52 @@ To set up the project locally, follow these steps:
    make check-env
    ```
 
+## Elasticsearch Health Checks
+
+The system includes comprehensive health checks for Elasticsearch to ensure everything is working correctly. Run the checks with:
+
+```bash
+make elastic-check
+```
+
+The checks verify:
+
+1. **Connectivity** 🔌
+   - Confirms Elasticsearch is running
+   - Provides instructions if the service is down
+
+2. **Cluster Health** 💚
+   - Monitors cluster status (green/yellow/red)
+   - Yellow status is normal for development (single-node clusters)
+   - Fails on red status (indicates serious issues)
+
+3. **Index Status** 📚
+   - Verifies existence of `course-questions` index
+   - Checks document count
+   - Suggests remediation if index is missing or empty
+
+4. **Mapping Configuration** 🗺️
+   - Validates index mapping structure
+   - Ensures presence of keyword fields for exact matching
+   - Warns if optimal settings are missing
+
+Example output:
+```bash
+Checking Elasticsearch status...
+✅ Elasticsearch is running
+⚠️  Cluster health is yellow - this is normal for single-node development clusters
+✅ Index 'course-questions' exists
+✅ Index contains 1896 documents
+✅ Index mapping includes keyword fields
+
+✨ All Elasticsearch checks passed successfully!
+```
+
+If any check fails, the command will:
+- Display a descriptive error message
+- Provide instructions for fixing the issue
+- Exit with a non-zero status code
+
 ## Usage
 
 To run the web application:
