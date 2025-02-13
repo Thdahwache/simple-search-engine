@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 from openai import OpenAI
 from ..elastic.client import get_elasticsearch_client
-from ..config import ElasticsearchConfig, OpenAIConfig
+from ..core.config import ElasticsearchConfig, OpenAIConfig
 from .templates import CONTEXT_TEMPLATE, PROMPT_TEMPLATE
 from ..utils.logger import setup_logger
 
@@ -55,16 +55,12 @@ class QABot:
                     },
                     "filter": {
                         "term": {
-                            "course": course
+                            "course.keyword": course
                         }
                     }
                 }
             }
         }
-        
-        print(search_query)
-        print(self.es_config.index_name)
-        print(self.elasticsearch_client)
         
         response = self.elasticsearch_client.search(
             index=self.es_config.index_name,
@@ -125,7 +121,6 @@ class QABot:
         """
         try:
             context_docs = self.retrieve_documents(user_question, course=course)
-            print("Contexto aberto",context_docs)
             if not context_docs:
                 return "I couldn't find any relevant information to answer your question."
                 
