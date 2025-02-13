@@ -2,13 +2,18 @@ import os
 from dataclasses import dataclass
 from typing import List, Dict, Any
 
+from dotenv import load_dotenv
+
+env_file = '.env'
+load_dotenv(env_file)
+
 @dataclass
 class ElasticsearchConfig:
     """Configuration settings for Elasticsearch connection and indexing"""
-    host: str = "http://localhost:9200"
-    index_name: str = "course-questions"
-    search_boost: int = 3  # Boost factor for question field
-    max_search_results: int = 5
+    host: str = os.getenv("ELASTICSEARCH_HOST")
+    index_name: str = os.getenv("ELASTICSEARCH_INDEX_NAME")
+    search_boost: int = os.getenv("ELASTICSEARCH_SEARCH_BOOST")
+    max_search_results: int = os.getenv("ELASTICSEARCH_MAX_SEARCH_RESULTS")
     
     # Elasticsearch index settings
     index_settings: Dict[str, Any] = None
@@ -32,9 +37,10 @@ class ElasticsearchConfig:
 @dataclass
 class OpenAIConfig:
     """Configuration settings for OpenAI API"""
-    model: str = "gpt-4o-mini"
-    temperature: float = 0.7
-    max_tokens: int = 10000
+    open_api_key: str = os.getenv("OPENAI_API_KEY")
+    model: str = os.getenv("OPENAI_MODEL")
+    temperature: float = float(os.getenv("OPENAI_TEMPERATURE"))
+    max_tokens: int = int(os.getenv("OPENAI_MAX_TOKENS"))
 
 @dataclass
 class AppConfig:

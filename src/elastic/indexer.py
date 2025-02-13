@@ -1,14 +1,13 @@
 import json
 from tqdm.auto import tqdm
 from elasticsearch import Elasticsearch
-from ..config import ElasticsearchConfig
+from ..core.config import ElasticsearchConfig
 from ..utils.logger import setup_logger
 from .client import get_elasticsearch_client
 import os
 
 logger = setup_logger(__name__)
 
-print(os.getcwd())
 def load_documents(file_path: str) -> list:
     with open(file_path, 'rt') as f_in:
         documents_file = json.load(f_in)
@@ -20,7 +19,6 @@ def load_documents(file_path: str) -> list:
             doc['course'] = course_name
             documents.append(doc)
     
-    print(documents)
     return documents
 
 def create_index(es: Elasticsearch) -> None:

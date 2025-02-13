@@ -1,5 +1,5 @@
 from elasticsearch import Elasticsearch
-from ..config import ElasticsearchConfig
+from ..core.config import ElasticsearchConfig
 from ..utils.logger import setup_logger
 
 logger = setup_logger(__name__)

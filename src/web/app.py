@@ -1,5 +1,5 @@
 import streamlit as st
-from src.config import AppConfig
+from src.core.config import AppConfig
 from src.rag.qa_bot import QABot
 from src.utils.logger import setup_logger
 
