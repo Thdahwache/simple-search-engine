@@ -14,4 +14,4 @@ QUESTION: {user_question}
 CONTEXT:
 
 {context}
-""".strip() 
+""".strip()

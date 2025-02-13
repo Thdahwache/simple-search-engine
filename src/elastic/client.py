@@ -1,8 +1,10 @@
 from elasticsearch import Elasticsearch
+
 from ..core.config import ElasticsearchConfig
 from ..utils.logger import setup_logger
 
 logger = setup_logger(__name__)
+
 
 def get_elasticsearch_client() -> Elasticsearch:
     try:
@@ -11,4 +13,4 @@ def get_elasticsearch_client() -> Elasticsearch:
         return client
     except Exception as e:
         logger.error(f"Failed to connect to Elasticsearch: {e}")
-        raise 
+        raise
