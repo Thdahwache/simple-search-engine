@@ -29,8 +29,8 @@ To set up the project locally, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/course_qa_system.git
-   cd course_qa_system
+   git clone https://github.com/Thdahwache/simple-search-engine
+   cd simple-search-engine
    ```
 
 2. **Install dependencies:**
@@ -41,7 +41,7 @@ To set up the project locally, follow these steps:
    make install
    ```
 
-   Using UV (faster installation):
+   Using UV (faster installation but needs to be installed first):
    ```bash
    make install-uv
    ```

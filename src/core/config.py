@@ -10,7 +10,7 @@ load_dotenv(env_file)
 
 @dataclass
 class ElasticsearchConfig:
-    """Configuration settings for Elasticsearch connection and indexing"""
+    """Configuration settings for Elasticsearch connection and indexing."""
 
     host: str = os.getenv("ELASTICSEARCH_HOST")
     index_name: str = os.getenv("ELASTICSEARCH_INDEX_NAME")
@@ -39,7 +39,7 @@ class ElasticsearchConfig:
 
 @dataclass
 class OpenAIConfig:
-    """Configuration settings for OpenAI API"""
+    """Configuration settings for OpenAI API."""
 
     open_api_key: str = os.getenv("OPENAI_API_KEY")
     model: str = os.getenv("OPENAI_MODEL")
@@ -49,7 +49,7 @@ class OpenAIConfig:
 
 @dataclass
 class AppConfig:
-    """Configuration settings for the web application"""
+    """Configuration settings for the web application."""
 
     available_courses: list[str] = None
 
