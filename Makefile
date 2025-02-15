@@ -149,7 +149,6 @@ dev: setup elastic-docker index
 # Clean up the environment
 clean: elastic-stop
 	@echo "Cleaning up..."
-	rm -rf venv .venv
 	rm -rf **/__pycache__
 	rm -rf .pytest_cache
 	@echo "✅ Environment cleaned."

@@ -2,10 +2,10 @@ from typing import Any
 
 from openai import OpenAI
 
-from ..core.config import ElasticsearchConfig, OpenAIConfig
-from ..elastic.client import get_elasticsearch_client
-from ..utils.logger import setup_logger
-from .templates import CONTEXT_TEMPLATE, PROMPT_TEMPLATE
+from src.core.config import ElasticsearchConfig, OpenAIConfig
+from src.elastic.client import get_elasticsearch_client
+from src.core.utils.logger import setup_logger
+from src.rag.templates import CONTEXT_TEMPLATE, PROMPT_TEMPLATE
 
 logger = setup_logger(__name__)
 
@@ -95,8 +95,7 @@ class QABot:
             )
             return response.choices[0].message.content
         except Exception as e:
-            error_msg = "OpenAI API error: %s"
-            logger.error(error_msg, str(e), exc_info=True)
+            logger.log_error("OpenAI API error", ex=e)
             return "I apologize, but I encountered an error while processing your question. Please try again."
 
     def answer_question(self, user_question: str, course: str) -> str:
@@ -113,12 +112,11 @@ class QABot:
         try:
             context_docs = self.retrieve_documents(user_question, course=course)
             if not context_docs:
-                logger.warning("No relevant documents found for question: %s", user_question)
+                logger.log_warning(f"No relevant documents found for question: {user_question}")
                 return "I couldn't find any relevant information to answer your question."
 
             prompt = self.build_prompt(user_question, context_docs)
             return self.ask_openai(prompt)
         except Exception as e:
-            error_msg = "Error in QA pipeline: %s"
-            logger.error(error_msg, str(e), exc_info=True)
+            logger.log_error("Error in QA pipeline", ex=e)
             return "I apologize, but something went wrong while processing your question. Please try again."

@@ -3,16 +3,25 @@ import streamlit as st
 from src.core.config import AppConfig
 from src.core.utils.logger import setup_logger
 from src.rag.qa_bot import QABot
+from src.elastic.client import get_elasticsearch_client
+from src.elastic.queries import unique_course_values
+from src.core.config import ElasticsearchConfig
 
 logger = setup_logger(__name__)
 
+def get_available_courses() -> list[str]:
+    """Get the list of available courses from Elasticsearch."""
+    es_client = get_elasticsearch_client()
+    es_config = ElasticsearchConfig()
+    response = es_client.search(index=es_config.index_name, body=unique_course_values)
+    return response["aggregations"]["unique_values"]["buckets"]
 
 def initialize_qa_system() -> QABot:
     """Initialize the QA system with required components."""
     try:
         return QABot()
     except Exception as e:
-        logger.error("Failed to initialize QA system: %s", str(e), exc_info=True)
+        logger.log_error("Failed to initialize QA system", ex=e)
         st.error("Failed to initialize the Q&A system. Please try again later.")
         st.stop()
 
@@ -28,7 +37,7 @@ def main():
     with st.form(key="qa_form"):
         selected_course = st.selectbox(
             "Select a course",
-            options=app_config.available_courses,
+            options=get_available_courses(),
             help="Choose the course you want to ask about",
         )
 
@@ -47,7 +56,7 @@ def main():
                 response = qa_bot.answer_question(user_question, course=selected_course)
                 response_placeholder.markdown(response)
         except Exception as e:
-            logger.error("Error processing question: %s", str(e), exc_info=True)
+            logger.log_error("Error processing question", ex=e)
             response_placeholder.error(
                 "An error occurred while processing your question. Please try again."
             )

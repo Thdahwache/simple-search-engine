@@ -4,9 +4,9 @@ from typing import Any
 from elasticsearch import Elasticsearch
 from tqdm.auto import tqdm
 
-from ..core.config import ElasticsearchConfig
-from ..utils.logger import setup_logger
-from .client import get_elasticsearch_client
+from src.core.config import ElasticsearchConfig
+from src.core.utils.logger import setup_logger
+from src.elastic.client import get_elasticsearch_client
 
 logger = setup_logger(__name__)
 
@@ -30,9 +30,9 @@ def create_index(es: Elasticsearch) -> None:
         es.indices.create(
             index=ElasticsearchConfig.index_name, body=ElasticsearchConfig.index_settings
         )
-        logger.info("Created index: %s", ElasticsearchConfig.index_name)
+        logger.log_info(f"Created index: {ElasticsearchConfig.index_name}")
     except Exception as e:
-        logger.error("Failed to create index %s: %s", ElasticsearchConfig.index_name, str(e), exc_info=True)
+        logger.log_error(f"Failed to create index {ElasticsearchConfig.index_name}", ex=e)
         raise
 
 
@@ -46,7 +46,7 @@ def index_documents(documents_file: str) -> None:
         try:
             es.index(index=ElasticsearchConfig.index_name, document=doc)
         except Exception as e:
-            logger.error("Failed to index document: %s", str(e), exc_info=True)
+            logger.log_error("Failed to index document", ex=e)
             raise
 
 

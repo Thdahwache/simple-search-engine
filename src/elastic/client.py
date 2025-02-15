@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 
-from ..core.config import ElasticsearchConfig
-from ..utils.logger import setup_logger
+from src.core.config import ElasticsearchConfig
+from src.core.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
@@ -9,8 +9,8 @@ logger = setup_logger(__name__)
 def get_elasticsearch_client() -> Elasticsearch:
     try:
         client = Elasticsearch(ElasticsearchConfig.host)
-        logger.info("Successfully connected to Elasticsearch")
+        logger.log_info("Successfully connected to Elasticsearch")
         return client
     except Exception as e:
-        logger.error("Failed to connect to Elasticsearch: %s", str(e), exc_info=True)
+        logger.log_error("Failed to connect to Elasticsearch", ex=e)
         raise

@@ -107,3 +107,15 @@ class Logger:
     def log_critical(self, message: str, **kwargs: Any) -> None:
         """Log critical message with context."""
         self._logger.critical(message, extra={"context": self.__get_context(**kwargs)})
+
+def setup_logger(name: str = "search-engine", log_level: LogLevel = LogLevel.INFO) -> Logger:
+    """Initialize and configure a logger instance.
+
+    Args:
+        name (str): Name for the logger instance. Defaults to "search-engine".
+        log_level (LogLevel): Minimum log level to record. Defaults to INFO.
+
+    Returns:
+        Logger: Configured logger instance
+    """
+    return Logger(log_level=log_level, name=name)
