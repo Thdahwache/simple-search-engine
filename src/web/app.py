@@ -14,7 +14,7 @@ def get_available_courses() -> list[str]:
     es_client = get_elasticsearch_client()
     es_config = ElasticsearchConfig()
     response = es_client.search(index=es_config.index_name, body=unique_course_values)
-    return response["aggregations"]["unique_values"]["buckets"]
+    return [bucket["key"] for bucket in response["aggregations"]["unique_values"]["buckets"]]
 
 def initialize_qa_system() -> QABot:
     """Initialize the QA system with required components."""
