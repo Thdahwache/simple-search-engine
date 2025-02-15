@@ -3,12 +3,13 @@ import logging
 import traceback
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, Optional
 
 
 class JSONFormatter(logging.Formatter):
     """Custom JSON formatter for log messages."""
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         """Format log record as JSON with standardized fields."""
         log_record = {
             "timestamp": datetime.now().astimezone().isoformat(),
@@ -42,7 +43,7 @@ class LogLevel(Enum):
 class Logger:
     """Standardized logger implementation with JSON formatting."""
 
-    def __init__(self, log_level: LogLevel, name: str = "search-engine"):
+    def __init__(self, log_level: LogLevel, name: str = "search-engine") -> None:
         """Initialize logger with specified log level.
 
         Args:
@@ -56,7 +57,7 @@ class Logger:
         self._name = name
         self.__configure(log_level.value)
 
-    def __configure(self, log_level: int):
+    def __configure(self, log_level: int) -> None:
         """Configure logger with JSON formatter and set log level."""
         formatter = JSONFormatter()
         loggers = [self._name, "uvicorn", "uvicorn.access", "uvicorn.error", "fastapi"]
@@ -67,41 +68,42 @@ class Logger:
             for handler in logger.handlers:
                 handler.setFormatter(formatter)
 
-    def __get_context(self, **kwargs):
+    def __get_context(self, **kwargs: Any) -> Dict[str, Any]:
         """Create context dictionary from keyword arguments."""
         return kwargs
 
     # Simplified logging methods with better context handling
-    def log_search(self, query: str, results_count: int, time_ms: float, **kwargs):
+    def log_search(self, query: str, results_count: int, time_ms: float, **kwargs: Any) -> None:
         """Log search operation with performance metrics.
 
         Args:
             query (str): Search query
             results_count (int): Number of results found
             time_ms (float): Query execution time in milliseconds
+            **kwargs: Additional context parameters
 
         """
         context = {"query": query, "results": results_count, "execution_time_ms": time_ms, **kwargs}
         self._logger.info("Search executed", extra={"context": context})
 
-    def log_debug(self, message: str, **kwargs):
+    def log_debug(self, message: str, **kwargs: Any) -> None:
         """Log debug message with context."""
         self._logger.debug(message, extra={"context": self.__get_context(**kwargs)})
 
-    def log_info(self, message: str, **kwargs):
+    def log_info(self, message: str, **kwargs: Any) -> None:
         """Log info message with context."""
         self._logger.info(message, extra={"context": self.__get_context(**kwargs)})
 
-    def log_warning(self, message: str, **kwargs):
+    def log_warning(self, message: str, **kwargs: Any) -> None:
         """Log warning message with context."""
         self._logger.warning(message, extra={"context": self.__get_context(**kwargs)})
 
-    def log_error(self, message: str, ex: Exception = None, **kwargs):
+    def log_error(self, message: str, ex: Optional[Exception] = None, **kwargs: Any) -> None:
         """Log error message with exception details."""
         self._logger.error(
             message, exc_info=bool(ex), extra={"context": self.__get_context(**kwargs)}
         )
 
-    def log_critical(self, message: str, **kwargs):
+    def log_critical(self, message: str, **kwargs: Any) -> None:
         """Log critical message with context."""
         self._logger.critical(message, extra={"context": self.__get_context(**kwargs)})

@@ -1,8 +1,8 @@
 import streamlit as st
 
 from src.core.config import AppConfig
+from src.core.utils.logger import setup_logger
 from src.rag.qa_bot import QABot
-from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

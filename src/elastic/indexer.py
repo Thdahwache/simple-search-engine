@@ -1,4 +1,5 @@
 import json
+from typing import Any, Dict, List
 
 from elasticsearch import Elasticsearch
 from tqdm.auto import tqdm
@@ -10,7 +11,7 @@ from .client import get_elasticsearch_client
 logger = setup_logger(__name__)
 
 
-def load_documents(file_path: str) -> list:
+def load_documents(file_path: str) -> List[Dict[str, Any]]:
     with open(file_path) as f_in:
         documents_file = json.load(f_in)
 

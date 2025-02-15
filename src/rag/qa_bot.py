@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from openai import OpenAI
 
@@ -15,14 +15,14 @@ class QABot:
     and OpenAI for generating answers.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.elasticsearch_client = get_elasticsearch_client()
         self.openai_client = OpenAI()
         self.es_config = ElasticsearchConfig()
         self.openai_config = OpenAIConfig()
 
     def retrieve_documents(
-        self, query: str, course: str, max_results: int = None
+        self, query: str, course: str, max_results: Optional[int] = None
     ) -> list[dict[str, Any]]:
         """Retrieve relevant documents from Elasticsearch.
 
@@ -52,11 +52,7 @@ class QABot:
                             "type": "best_fields",
                         }
                     },
-                    "filter": {
-                        "term": {
-                            "course.keyword": course
-                        }
-                    }
+                    "filter": {"term": {"course.keyword": course}},
                 }
             },
         }
@@ -78,10 +74,7 @@ class QABot:
     def build_prompt(self, user_question: str, documents: list[dict[str, Any]]) -> str:
         """Build prompt for OpenAI using user question and retrieved documents."""
         context = self.build_context(documents)
-        return PROMPT_TEMPLATE.format(
-            user_question=user_question,
-            context=context
-        )
+        return PROMPT_TEMPLATE.format(user_question=user_question, context=context)
 
     def ask_openai(self, prompt: str) -> str:
         """Send prompt to OpenAI and get response.
