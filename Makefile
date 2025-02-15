@@ -1,33 +1,57 @@
 # Makefile for DataTalks.Club Course Q&A System
 
-.PHONY: all install install-uv run clean test lint elastic-docker elastic-check index dev
+.PHONY: all install install-uv run clean test lint elastic-docker elastic-health elastic-check index dev setup
 
 # Default target
-all: install-uv elastic-docker index
+all: setup elastic-docker index run
+
+# Setup environment and dependencies
+setup: check-env install-uv
+
+# Check and setup environment
+check-env:
+	@echo "Checking environment setup..."
+	@if [ ! -f .env ]; then \
+		if [ -f .env.example ]; then \
+			echo "⚠️  .env file not found. Creating from .env.example..."; \
+			cp .env.example .env; \
+			echo "⚠️  Please edit .env file with your configurations."; \
+			exit 1; \
+		else \
+			echo "❌ Neither .env nor .env.example files found!"; \
+			exit 1; \
+		fi \
+	fi
+	@if [ -z "$$OPENAI_API_KEY" ]; then \
+		echo "❌ Error: OPENAI_API_KEY is not set in environment"; \
+		echo "Please set it in your .env file or export it"; \
+		exit 1; \
+	fi
+	@echo "✅ Environment check passed"
 
 # Install dependencies with pip (default)
 install:
 	@echo "Installing dependencies with pip..."
-	python -m venv venv
-	. venv/bin/activate && pip install -r requirements.txt
-	@echo "Dependencies installed. Activate the virtual environment with:"
-	@echo "source venv/bin/activate  # Linux/Mac"
-	@echo "venv\\Scripts\\activate   # Windows"
+	python -m venv .venv
+	. .venv/bin/activate && pip install -r requirements.txt
+	@echo "✅ Dependencies installed. Activate the virtual environment with:"
+	@echo "source .venv/bin/activate  # Linux/Mac"
+	@echo ".venv\\Scripts\\activate   # Windows"
 
 # Install dependencies with uv (faster)
 install-uv:
 	@echo "Installing dependencies with uv..."
 	@if ! command -v uv >/dev/null 2>&1; then \
 		echo "UV not found. Installing UV..."; \
-		curl -LsSf https://astral.sh/uv/install.sh | sh; \
+		sudo snap install astral-uv; \
 	fi
 	uv sync
-	@echo "Dependencies installed. Activate the virtual environment with:"
+	@echo "✅ Dependencies installed. Activate the virtual environment with:"
 	@echo "source .venv/bin/activate  # Linux/Mac"
-	@echo ".venv\Scripts\activate   # Windows"
+	@echo ".venv\\Scripts\\activate   # Windows"
 
 # Start Elasticsearch with Docker
-elastic-docker:
+elastic-docker: elastic-stop
 	@echo "Starting Elasticsearch with Docker..."
 	@if [ "$$(docker ps -q -f name=elasticsearch)" ]; then \
 		echo "Elasticsearch is already running"; \
@@ -44,10 +68,11 @@ elastic-docker:
 		echo "Waiting for Elasticsearch to start..."; \
 		sleep 30; \
 	fi
+	@make elastic-health
 
-# Check Elasticsearch status
-elastic-check:
-	@echo "Checking Elasticsearch status..."
+# Basic Elasticsearch health check
+elastic-health:
+	@echo "Checking Elasticsearch health..."
 	@# Check if Elasticsearch is running
 	@if ! curl -s "http://localhost:9200/_cluster/health" >/dev/null; then \
 		echo "❌ Elasticsearch is not running. Start it with:"; \
@@ -66,7 +91,10 @@ elastic-check:
 	else \
 		echo "✅ Cluster health is green"; \
 	fi
-	
+
+# Validate index status
+elastic-check: elastic-health
+	@echo "Validating Elasticsearch index..."
 	@# Check indices
 	@if ! curl -s "http://localhost:9200/_cat/indices?v" | grep -q "course-questions"; then \
 		echo "❌ Index 'course-questions' does not exist"; \
@@ -102,38 +130,26 @@ elastic-stop:
 		echo "Elasticsearch is not running"; \
 	fi
 
-# Check elasticsearch indexs
-elastic-check-index:
-	@echo "Checking Elasticsearch indexes..."
-	@if [ "$$(curl -s "http://localhost:9200/_cat/indices?h=index" | grep -q "course-questions")" ]; then \
-		echo "Elasticsearch index 'course-questions' exists"; \
-	else \
-		echo "Elasticsearch index 'course-questions' does not exist"; \
-		exit 1; \
-	fi
-
 # Index documents
-index: elastic-check
-	@echo "Indexing documents..."
+index: elastic-health
+	@echo "Creating and indexing documents..."
 	python -m src.elastic.indexer
+	@make elastic-check
 
 # Run the web application
 run: elastic-check
 	@echo "Starting Streamlit application..."
 	python -m streamlit run src/web/app.py --server.port 8501 --server.address localhost --client.showSidebarNavigation false --server.headless true --server.fileWatcherType auto
 
+# Development mode (with debug options)
+dev: setup elastic-docker index
+	@echo "Starting development server..."
+	python -m streamlit run src/web/app.py --server.port 8501 --server.address localhost --server.runOnSave true --server.fileWatcherType auto
 
 # Clean up the environment
 clean: elastic-stop
 	@echo "Cleaning up..."
-	rm -rf venv
-	rm -rf __pycache__
+	rm -rf venv .venv
+	rm -rf **/__pycache__
 	rm -rf .pytest_cache
-	@echo "Environment cleaned."
-
-# Check environment variables
-check-env:
-	@if [ -z "$$OPENAI_API_KEY" ]; then \
-		echo "Error: OPENAI_API_KEY is not set"; \
-		exit 1; \
-	fi
+	@echo "✅ Environment cleaned."
