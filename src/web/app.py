@@ -12,7 +12,7 @@ def initialize_qa_system() -> QABot:
     try:
         return QABot()
     except Exception as e:
-        logger.error(f"Failed to initialize QA system: {e}")
+        logger.error("Failed to initialize QA system: %s", str(e), exc_info=True)
         st.error("Failed to initialize the Q&A system. Please try again later.")
         st.stop()
 
@@ -47,7 +47,7 @@ def main():
                 response = qa_bot.answer_question(user_question, course=selected_course)
                 response_placeholder.markdown(response)
         except Exception as e:
-            logger.error(f"Error processing question: {e}")
+            logger.error("Error processing question: %s", str(e), exc_info=True)
             response_placeholder.error(
                 "An error occurred while processing your question. Please try again."
             )

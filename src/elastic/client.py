@@ -12,5 +12,5 @@ def get_elasticsearch_client() -> Elasticsearch:
         logger.info("Successfully connected to Elasticsearch")
         return client
     except Exception as e:
-        logger.error(f"Failed to connect to Elasticsearch: {e}")
+        logger.error("Failed to connect to Elasticsearch: %s", str(e), exc_info=True)
         raise

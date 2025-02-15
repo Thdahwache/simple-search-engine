@@ -30,9 +30,9 @@ def create_index(es: Elasticsearch) -> None:
         es.indices.create(
             index=ElasticsearchConfig.index_name, body=ElasticsearchConfig.index_settings
         )
-        logger.info(f"Created index: {ElasticsearchConfig.index_name}")
+        logger.info("Created index: %s", ElasticsearchConfig.index_name)
     except Exception as e:
-        logger.error(f"Failed to create index: {e}")
+        logger.error("Failed to create index %s: %s", ElasticsearchConfig.index_name, str(e), exc_info=True)
         raise
 
 
@@ -46,8 +46,8 @@ def index_documents(documents_file: str) -> None:
         try:
             es.index(index=ElasticsearchConfig.index_name, document=doc)
         except Exception as e:
-            logger.error(f"Failed to index document: {e}")
-            continue
+            logger.error("Failed to index document: %s", str(e), exc_info=True)
+            raise
 
 
 if __name__ == "__main__":
