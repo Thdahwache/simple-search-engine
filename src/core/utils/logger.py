@@ -3,7 +3,7 @@ import logging
 import traceback
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class JSONFormatter(logging.Formatter):
@@ -68,7 +68,7 @@ class Logger:
             for handler in logger.handlers:
                 handler.setFormatter(formatter)
 
-    def __get_context(self, **kwargs: Any) -> Dict[str, Any]:
+    def __get_context(self, **kwargs: Any) -> dict[str, Any]:
         """Create context dictionary from keyword arguments."""
         return kwargs
 
@@ -98,7 +98,7 @@ class Logger:
         """Log warning message with context."""
         self._logger.warning(message, extra={"context": self.__get_context(**kwargs)})
 
-    def log_error(self, message: str, ex: Optional[Exception] = None, **kwargs: Any) -> None:
+    def log_error(self, message: str, ex: Exception | None = None, **kwargs: Any) -> None:
         """Log error message with exception details."""
         self._logger.error(
             message, exc_info=bool(ex), extra={"context": self.__get_context(**kwargs)}

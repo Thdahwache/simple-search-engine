@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from openai import OpenAI
 
@@ -22,7 +22,7 @@ class QABot:
         self.openai_config = OpenAIConfig()
 
     def retrieve_documents(
-        self, query: str, course: str, max_results: Optional[int] = None
+        self, query: str, course: str, max_results: int | None = None
     ) -> list[dict[str, Any]]:
         """Retrieve relevant documents from Elasticsearch.
 
