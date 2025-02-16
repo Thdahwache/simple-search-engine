@@ -42,17 +42,3 @@ class OpenAIConfig:
     model: str = os.getenv("OPENAI_MODEL")
     temperature: float = float(os.getenv("OPENAI_TEMPERATURE"))
     max_tokens: int = int(os.getenv("OPENAI_MAX_TOKENS"))
-
-
-@dataclass
-class AppConfig:
-    """Configuration settings for the web application."""
-
-    available_courses: list[str] = None
-
-    def __post_init__(self):
-        self.available_courses = [
-            "data-engineering-zoomcamp",
-            "machine-learning-zoomcamp",
-            "mlops-zoomcamp",
-        ]

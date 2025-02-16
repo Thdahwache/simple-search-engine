@@ -1,6 +1,5 @@
 import streamlit as st
 
-from src.core.config import AppConfig
 from src.core.utils.logger import setup_logger
 from src.rag.qa_bot import QABot
 from src.elastic.client import get_elasticsearch_client
@@ -32,7 +31,7 @@ def main():
     st.subheader("Ask questions about our courses")
 
     qa_bot = initialize_qa_system()
-    app_config = AppConfig()
+
 
     with st.form(key="qa_form"):
         selected_course = st.selectbox(
