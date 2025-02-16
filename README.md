@@ -101,7 +101,7 @@ Checking Elasticsearch status...
 ✅ Elasticsearch is running
 ⚠️  Cluster health is yellow - this is normal for single-node development clusters
 ✅ Index 'course-questions' exists
-✅ Index contains 1896 documents
+✅ Index contains 948 documents
 ✅ Index mapping includes keyword fields
 
 ✨ All Elasticsearch checks passed successfully!
@@ -143,9 +143,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Acknowledgments
 
-- Thanks to DataTalks.Club for the educational resources and support.
-- Special thanks to the contributors and the community for their valuable input.
+- Thanks to DataTalks.Club for the educational resources and support
+- Special thanks to the contributors and the community for their valuable input
 
 ## Contact
 
-For any inquiries, please reach out to [your_email@example.com].
+For any inquiries, please reach out to [tharikdahwache@gmail.com].
