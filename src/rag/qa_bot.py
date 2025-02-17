@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any
 
 from openai import OpenAI
@@ -6,8 +7,14 @@ from src.core.config import ElasticsearchConfig, OpenAIConfig
 from src.elastic.client import get_elasticsearch_client
 from src.core.utils.logger import setup_logger
 from src.rag.templates import CONTEXT_TEMPLATE, PROMPT_TEMPLATE
+from src.elastic.queries import build_text_search_query, build_vector_search_query
 
 logger = setup_logger(__name__)
+
+
+class SearchMethod(Enum):
+    TEXT = "text"
+    VECTOR = "vector"
 
 
 class QABot:
@@ -15,11 +22,12 @@ class QABot:
     and OpenAI for generating answers.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, search_method: SearchMethod = SearchMethod.TEXT) -> None:
         self.elasticsearch_client = get_elasticsearch_client()
         self.openai_client = OpenAI()
         self.es_config = ElasticsearchConfig()
         self.openai_config = OpenAIConfig()
+        self.search_method = search_method
 
     def retrieve_documents(
         self, query: str, course: str, max_results: int | None = None
@@ -35,32 +43,19 @@ class QABot:
             List of relevant documents
 
         """
-        max_results = max_results or self.es_config.max_search_results
+        if self.search_method == SearchMethod.TEXT:
+            search_query = build_text_search_query(query, course)
+        else:
+            search_query = build_vector_search_query(query, course)
 
-        search_query = {
-            "size": max_results,
-            "query": {
-                "bool": {
-                    "must": {
-                        "multi_match": {
-                            "query": query,
-                            "fields": [
-                                f"question^{self.es_config.search_boost}",
-                                "text",
-                                "section",
-                            ],
-                            "type": "best_fields",
-                        }
-                    },
-                    "filter": {"term": {"course.keyword": course}},
-                }
-            },
-        }
-
-        response = self.elasticsearch_client.search(
-            index=self.es_config.index_name, body=search_query
-        )
-        return [hit["_source"] for hit in response["hits"]["hits"]]
+        try:
+            response = self.elasticsearch_client.search(
+                index=self.es_config.index_name, body=search_query
+            )
+            return [hit["_source"] for hit in response["hits"]["hits"]]
+        except Exception as e:
+            logger.log_error(f"Error retrieving documents using {self.search_method.value} search", ex=e)
+            return []
 
     def build_context(self, documents: list[dict[str, Any]]) -> str:
         """Build context string from retrieved documents."""
