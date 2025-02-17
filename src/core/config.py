@@ -16,6 +16,7 @@ class ElasticsearchConfig:
     index_name: str = os.getenv("ELASTICSEARCH_INDEX_NAME")
     search_boost: int = os.getenv("ELASTICSEARCH_SEARCH_BOOST")
     max_search_results: int = os.getenv("ELASTICSEARCH_MAX_SEARCH_RESULTS")
+    embedding_dim: int = 768  # Dimension for all-mpnet-base-v2
 
     # Elasticsearch index settings
     index_settings: dict[str, Any] = None
@@ -29,6 +30,12 @@ class ElasticsearchConfig:
                     "section": {"type": "text"},
                     "question": {"type": "text"},
                     "course": {"type": "keyword"},
+                    "text_vector": {
+                        "type": "dense_vector",
+                        "dims": self.embedding_dim,
+                        "index": True,
+                        "similarity": "cosine"
+                    }
                 }
             },
         }
