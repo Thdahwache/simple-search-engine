@@ -1,4 +1,5 @@
 import json
+import hashlib
 from typing import Any
 
 from elasticsearch import Elasticsearch
@@ -11,6 +12,13 @@ from src.models.embedding import embed_text
 
 logger = setup_logger(__name__)
 
+def generate_hash_id(doc: dict[str, Any]) -> str:
+    combined = f"{doc['course']}-{doc['question']}-{doc['text'][:12]}"
+    hash_object = hashlib.md5(combined.encode())
+    hash_hex = hash_object.hexdigest()
+    document_id = hash_hex[:8]
+    
+    return document_id
 
 def load_documents(file_path: str) -> list[dict[str, Any]]:
     with open(file_path) as f_in:
@@ -21,8 +29,14 @@ def load_documents(file_path: str) -> list[dict[str, Any]]:
         course_name = course["course"]
         for doc in course["documents"]:
             doc["course"] = course_name
+            # Create hash id
+            doc["id"] = generate_hash_id(doc)
+            # Create question + text
+            question_text = f"{doc['question']} {doc['text']}"
             # Add embedding for the text
             doc["text_vector"] = embed_text(doc["text"])
+            doc['question_vector'] = embed_text(doc["question"])
+            doc['question_text_vector'] = embed_text(question_text)
             documents.append(doc)
 
     return documents
@@ -42,8 +56,11 @@ def create_index(es: Elasticsearch, es_config: ElasticsearchConfig) -> None:
 
 def delete_index(es: Elasticsearch, es_config: ElasticsearchConfig) -> None:
     try:
-        es.indices.delete(index=es_config.index_name)
-        logger.log_info(f"Deleted index: {es_config.index_name}")
+        if es.indices.exists(index=es_config.index_name):
+            es.indices.delete(index=es_config.index_name)
+            logger.log_info(f"Deleted index: {es_config.index_name}")
+        else:
+            logger.log_info(f"Index {es_config.index_name} does not exist, skipping deletion")
     except Exception as e:
         logger.log_error(f"Failed to delete index {es_config.index_name}", ex=e)
         raise
@@ -65,7 +82,10 @@ def index_documents(documents_file: str) -> None:
                     "section": doc["section"],
                     "question": doc["question"],
                     "course": doc["course"],
-                    "text_vector": doc["text_vector"]
+                    "text_vector": doc["text_vector"],
+                    "question_vector": doc["question_vector"],
+                    "question_text_vector": doc["question_text_vector"],
+                    "id": doc["id"]
                 },
                 error_trace=True
             )
