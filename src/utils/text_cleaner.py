@@ -18,7 +18,7 @@ def clean_text_for_json(text: str) -> str:
     text = re.sub(r'\\\\', '/', text)
     
     # Handle command syntax (like \d) by escaping the backslash
-    text = re.sub(r'(?<!\\)\\([a-zA-Z])', r'\\\\\\1', text)
+    text = re.sub(r'(?<!\\)\\([a-zA-Z])', r'\\\1', text)
     
     # Replace trailing backslashes with forward slash
     text = re.sub(r'\\$', '/', text.rstrip())

@@ -5,7 +5,7 @@ from typing import Any
 from dotenv import load_dotenv
 
 env_file = ".env"
-load_dotenv(env_file)
+load_dotenv(env_file, override=True)
 
 
 @dataclass

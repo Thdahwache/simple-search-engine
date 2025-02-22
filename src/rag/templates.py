@@ -16,7 +16,7 @@ CONTEXT:
 {context}
 """.strip()
 
-GROUNG_TRUTH_PROMPT = """
+GROUND_TRUTH_PROMPT = """
 You emulate a student who's taking our course.
 Formulate 5 questions this student might ask based on a FAQ record. The record
 should contain the answer to the questions, and the questions should be complete and not too short.
@@ -28,7 +28,7 @@ section: {section}
 question: {question}
 answer: {text}
 
-Provide the output in parsable JSON without using code blocks:
-
+Provide the output in parsable JSON without using code block:
+EXAMPLE:
 ["question1", "question2", ..., "question5"]
 """.strip()

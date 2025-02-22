@@ -1,6 +1,6 @@
 # Makefile for DataTalks.Club Course Q&A System
 
-.PHONY: all install install-uv run clean test lint elastic-docker elastic-health elastic-check index dev setup
+.PHONY: all install install-uv run clean test lint elastic-docker elastic-health elastic-check index dev setup ground-truth-generation
 
 # Default target
 all: setup elastic-docker index run
@@ -136,15 +136,15 @@ index: elastic-health
 	python -m src.elastic.indexer
 	@make elastic-check
 
+# Generate ground truth data
+ground-truth-generation: elastic-check
+	@echo "Generating ground truth data..."
+	python -m src.rag.generate_ground_truth
+
 # Run the web application
 run: elastic-check
 	@echo "Starting Streamlit application..."
 	python -m streamlit run src/web/app.py --server.port 8501 --server.address localhost --client.showSidebarNavigation false --server.headless true --server.fileWatcherType auto
-
-# Development mode (with debug options)
-dev: setup elastic-docker index
-	@echo "Starting development server..."
-	python -m streamlit run src/web/app.py --server.port 8501 --server.address localhost --server.runOnSave true --server.fileWatcherType auto
 
 # Clean up the environment
 clean: elastic-stop

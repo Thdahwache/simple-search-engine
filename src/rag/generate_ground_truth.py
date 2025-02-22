@@ -5,7 +5,6 @@ from pathlib import Path
 import time
 
 from tqdm.auto import tqdm
-from elasticsearch import Elasticsearch
 
 from src.core.config import ElasticsearchConfig
 from src.elastic.client import get_elasticsearch_client
@@ -24,7 +23,15 @@ def process_document(doc: dict[str, Any], max_retries: int = 3) -> list[tuple[st
     while retries < max_retries:
         try:
             questions = generate_questions(doc)
-            questions_list = json.loads(questions)
+            questions_data = json.loads(questions)
+            
+            # Handle both list and object formats
+            if isinstance(questions_data, list):
+                questions_list = questions_data
+            elif isinstance(questions_data, dict):
+                questions_list = [v for v in questions_data.values()]
+            else:
+                raise ValueError(f"Unexpected response format: {type(questions_data)}")
             
             return [
                 (generated_question, doc["course"], doc["id"])
@@ -37,7 +44,10 @@ def process_document(doc: dict[str, Any], max_retries: int = 3) -> list[tuple[st
                 logger.log_error(
                     f"Failed to process document after {max_retries} attempts",
                     ex=e,
-                    extra={"document_id": doc["id"]}
+                    extra={
+                        "document_id": doc["id"],
+                        "raw_response": questions if 'questions' in locals() else None
+                    }
                 )
                 return []  # Return empty list on failure
             
