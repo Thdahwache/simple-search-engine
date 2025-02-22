@@ -9,6 +9,7 @@ from src.core.config import ElasticsearchConfig
 from src.core.utils.logger import setup_logger
 from src.elastic.client import get_elasticsearch_client
 from src.models.embedding import embed_text
+from src.utils.text_cleaner import clean_text_for_json
 
 logger = setup_logger(__name__)
 
@@ -28,6 +29,11 @@ def load_documents(file_path: str) -> list[dict[str, Any]]:
     for course in documents_file:
         course_name = course["course"]
         for doc in course["documents"]:
+            
+            # Clean text fields before processing
+            doc["text"] = clean_text_for_json(doc["text"])
+            doc["question"] = clean_text_for_json(doc["question"])
+            # Course name don't have any problems
             doc["course"] = course_name
             # Create hash id
             doc["id"] = generate_hash_id(doc)
