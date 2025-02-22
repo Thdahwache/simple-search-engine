@@ -48,17 +48,17 @@ def process_document(doc: dict[str, Any], max_retries: int = 3) -> list[tuple[st
 
 def process_all_documents() -> list[tuple[str, str, str]]:
     """
-    Recupera todos os documentos do Elasticsearch e gera perguntas para cada um.
-    Retorna uma lista de tuplas (pergunta, curso, documento_id).
+    Retrieves all documents from Elasticsearch and generates questions for each one.
+    Returns a list of tuples (question, course, document_id).
     """
     es = get_elasticsearch_client()
     es_config = ElasticsearchConfig()
     
-    # Busca todos os documentos usando a query específica
+    # Search for all documents using the specific query
     query = build_all_documents_query()
     
     try:
-        # Busca os documentos
+        # Fetch the documents
         response = es.search(
             index=es_config.index_name,
             body=query
@@ -67,8 +67,8 @@ def process_all_documents() -> list[tuple[str, str, str]]:
         results = []
         failed_docs = []
         
-        # Processa cada documento
-        for hit in tqdm(response['hits']['hits'], desc="Gerando perguntas"):
+        # Process each document
+        for hit in tqdm(response['hits']['hits'], desc="Generating questions"):
             doc = hit['_source']
             doc_results = process_document(doc)
             
@@ -95,23 +95,23 @@ def process_all_documents() -> list[tuple[str, str, str]]:
         return results
             
     except Exception as e:
-        logger.log_error("Falha ao buscar documentos do Elasticsearch", ex=e)
+        logger.log_error("Failed to fetch documents from Elasticsearch", ex=e)
         raise
 
 if __name__ == "__main__":
-    # Cria o diretório de saída se não existir
+    # Create output directory if it doesn't exist
     output_dir = Path("data/output")
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    # Processa os documentos
+    # Process the documents
     results = process_all_documents()
     
-    # Cria o DataFrame com as colunas corretas
+    # Create DataFrame with correct columns
     df = pd.DataFrame(results, columns=['question', 'course', 'document'])
     
-    # Salva os resultados em CSV
+    # Save results to CSV
     output_file = output_dir / "ground-truth-data.csv"
     df.to_csv(output_file, index=False)
     
-    logger.log_info(f"Ground truth data salvo em {output_file}")
-    logger.log_info(f"Total de perguntas geradas: {len(df)}") 
+    logger.log_info(f"Ground truth data saved to {output_file}")
+    logger.log_info(f"Total questions generated: {len(df)}") 
