@@ -60,3 +60,21 @@ def build_vector_search_query(query: str, course: str | None = None) -> dict[str
             }
         }
     }
+
+def build_all_documents_query(size: int = 10000) -> dict[str, Any]:
+    """
+    Constrói uma query para buscar todos os documentos do índice.
+    
+    Args:
+        size: Número máximo de documentos a retornar. Padrão é 10000.
+        
+    Returns:
+        Query para buscar todos os documentos com seus campos necessários.
+    """
+    return {
+        "size": size,
+        "query": {
+            "match_all": {}
+        },
+        "_source": ["id", "text", "section", "question", "course"]
+    }

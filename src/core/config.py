@@ -30,12 +30,25 @@ class ElasticsearchConfig:
                     "section": {"type": "text"},
                     "question": {"type": "text"},
                     "course": {"type": "keyword"},
+                    "id": {"type": "keyword"},
                     "text_vector": {
                         "type": "dense_vector",
                         "dims": self.embedding_dim,
                         "index": True,
                         "similarity": "cosine"
-                    }
+                    },
+                    "question_vector": {
+                        "type": "dense_vector",
+                        "dims": self.embedding_dim,
+                        "index": True,
+                        "similarity": "cosine"
+                    },
+                    "question_text_vector": {
+                        "type": "dense_vector",
+                        "dims": self.embedding_dim,
+                        "index": True,
+                        "similarity": "cosine"
+                    }  
                 }
             },
         }
