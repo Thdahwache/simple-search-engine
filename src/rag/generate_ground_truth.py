@@ -6,14 +6,49 @@ import time
 
 from tqdm.auto import tqdm
 
+from rag.templates import GROUND_TRUTH_PROMPT
 from src.core.config import ElasticsearchConfig
 from src.elastic.client import get_elasticsearch_client
 from src.core.utils.logger import setup_logger
-from src.rag.evaluate import generate_questions
 from src.elastic.queries import build_all_documents_query
 
 logger = setup_logger(__name__)
 
+def generate_questions(doc):
+    prompt = GROUND_TRUTH_PROMPT.format(**doc)
+
+    response = client.chat.completions.create(
+        model='gpt-4o-mini',
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    json_response = response.choices[0].message.content
+    
+    try:
+        # Try to parse and validate the response
+        questions = json.loads(json_response)
+        
+        # Validate that we got a list of exactly 5 questions
+        if not isinstance(questions, list):
+            raise ValueError("Response is not a list")
+        if len(questions) != 5:
+            raise ValueError(f"Expected 5 questions, got {len(questions)}")
+        if not all(isinstance(q, str) for q in questions):
+            raise ValueError("All items must be strings")
+            
+        return json_response
+        
+    except Exception as e:
+        logger.log_error(
+            f"Failed to parse GPT response for document {doc['id']}",
+            ex=e,
+            extra={
+                "document_id": doc["id"],
+                "raw_response": json_response,
+                "prompt": prompt
+            }
+        )
+        raise
 def process_document(doc: dict[str, Any], max_retries: int = 3) -> list[tuple[str, str, str]]:
     """
     Process a single document with retry logic.
