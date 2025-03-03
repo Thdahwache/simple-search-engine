@@ -17,6 +17,7 @@ def get_elasticsearch_client() -> Elasticsearch:
 
     Raises:
         Exception: If connection to Elasticsearch fails.
+
     """
     try:
         client = Elasticsearch(ElasticsearchConfig.host)

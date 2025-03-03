@@ -1,5 +1,5 @@
-import json
 import hashlib
+import json
 from typing import Any
 
 from elasticsearch import Elasticsearch
@@ -21,12 +21,13 @@ def generate_hash_id(doc: dict[str, Any]) -> str:
 
     Returns:
         str: An 8-character hexadecimal hash string based on document content.
+
     """
     combined = f"{doc['course']}-{doc['question']}-{doc['text'][:12]}"
     hash_object = hashlib.md5(combined.encode())
     hash_hex = hash_object.hexdigest()
     document_id = hash_hex[:8]
-    
+
     return document_id
 
 def load_documents(file_path: str) -> list[dict[str, Any]]:
@@ -56,9 +57,10 @@ def load_documents(file_path: str) -> list[dict[str, Any]]:
         FileNotFoundError: If the specified file does not exist
         json.JSONDecodeError: If the file contains invalid JSON
         KeyError: If required fields are missing in the JSON structure
+
     """
     try:
-        with open(file_path, encoding='utf-8') as f_in:
+        with open(file_path, encoding="utf-8") as f_in:
             raw_documents = json.load(f_in)
 
         documents = []
@@ -77,8 +79,8 @@ def load_documents(file_path: str) -> list[dict[str, Any]]:
                     question_text = f"{doc['question']} {doc['text']}"
                     # Add embedding for the text
                     doc["text_vector"] = embed_text(doc["text"])
-                    doc['question_vector'] = embed_text(doc["question"])
-                    doc['question_text_vector'] = embed_text(question_text)
+                    doc["question_vector"] = embed_text(doc["question"])
+                    doc["question_text_vector"] = embed_text(question_text)
                     documents.append(doc)
                 except KeyError as e:
                     logger.log_error(f"Missing required field in document: {e}", ex=e)
@@ -89,7 +91,7 @@ def load_documents(file_path: str) -> list[dict[str, Any]]:
 
         if not documents:
             logger.log_warning("No documents were successfully processed")
-            
+
         return documents
     except FileNotFoundError as e:
         logger.log_error(f"File not found: {file_path}", ex=e)
@@ -110,6 +112,7 @@ def create_index(es: Elasticsearch, es_config: ElasticsearchConfig) -> None:
 
     Raises:
         Exception: If index creation fails.
+
     """
     try:
         logger.log_info(es_config.index_settings)
@@ -132,6 +135,7 @@ def delete_index(es: Elasticsearch, es_config: ElasticsearchConfig) -> None:
 
     Raises:
         Exception: If index deletion fails.
+
     """
     try:
         if es.indices.exists(index=es_config.index_name):
@@ -157,6 +161,7 @@ def index_documents(file_path: str) -> None:
 
     Raises:
         Exception: If document indexing fails.
+
     """
     es = get_elasticsearch_client()
     documents = load_documents(file_path)

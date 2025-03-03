@@ -48,7 +48,7 @@ class ElasticsearchConfig:
                         "dims": self.embedding_dim,
                         "index": True,
                         "similarity": "cosine"
-                    }  
+                    }
                 }
             },
         }

@@ -117,5 +117,6 @@ def setup_logger(name: str = "search-engine", log_level: LogLevel = LogLevel.INF
 
     Returns:
         Logger: Configured logger instance
+
     """
     return Logger(log_level=log_level, name=name)

@@ -13,6 +13,7 @@ def embed_text(text: str) -> list[float]:
 
     Returns:
         list[float]: A 768-dimensional vector representation of the input text.
+
     """
     return model.encode(text).tolist()
 

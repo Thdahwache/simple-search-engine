@@ -17,7 +17,7 @@ def build_text_search_query(query: str, course: str | None = None) -> dict[str, 
         },
         {"match": {"question": {"query": query}}}
     ]
-    
+
     if course:
         filter_conditions = [{"term": {"course": course}}]
     else:
@@ -37,7 +37,7 @@ def build_text_search_query(query: str, course: str | None = None) -> dict[str, 
 def build_vector_search_query(query: str, course: str | None = None) -> dict[str, Any]:
     """Build a vector-based semantic search query."""
     query_vector = embed_text(query)
-    
+
     if course:
         filter_conditions = [{"term": {"course": course}}]
     else:
@@ -71,16 +71,17 @@ def build_knn_query(query: str, field: str, course: str | None = None) -> dict[s
         
     Returns:
         Elasticsearch KNN query
+
     """
     query_vector = embed_text(query)
-    
+
     knn = {
         "field": field,
         "query_vector": query_vector,
         "k": ElasticsearchConfig.max_search_results,
         "num_candidates": 10000,
     }
-    
+
     # Add course filter if specified
     if course:
         knn["filter"] = {
@@ -122,9 +123,9 @@ def build_combined_vector_knn_query(query: str, course: str | None = None) -> di
     question_text vectors for more robust matching.
     """
     query_vector = embed_text(query)
-    
+
     filter_condition = {"term": {"course": course}} if course else {"match_all": {}}
-    
+
     return {
         "size": ElasticsearchConfig.max_search_results,
         "query": {
@@ -161,6 +162,7 @@ def build_all_documents_query(size: int = 10000) -> dict[str, Any]:
         
     Returns:
         Query to retrieve all documents with their required fields.
+
     """
     return {
         "size": size,

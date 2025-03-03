@@ -4,17 +4,17 @@ from typing import Any
 from openai import OpenAI
 
 from src.core.config import ElasticsearchConfig, OpenAIConfig
-from src.elastic.client import get_elasticsearch_client
 from src.core.utils.logger import setup_logger
-from src.rag.templates import CONTEXT_TEMPLATE, PROMPT_TEMPLATE
+from src.elastic.client import get_elasticsearch_client
 from src.elastic.queries import (
-    build_text_search_query, 
-    build_vector_search_query,
-    build_question_vector_knn_query,
-    build_text_vector_knn_query,
+    build_combined_vector_knn_query,
     build_question_text_vector_knn_query,
-    build_combined_vector_knn_query
+    build_question_vector_knn_query,
+    build_text_search_query,
+    build_text_vector_knn_query,
+    build_vector_search_query,
 )
+from src.rag.templates import CONTEXT_TEMPLATE, PROMPT_TEMPLATE
 
 logger = setup_logger(__name__)
 
