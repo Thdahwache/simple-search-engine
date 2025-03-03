@@ -3,8 +3,17 @@ from typing import List, Dict, Callable, Any
 import pandas as pd
 from tqdm import tqdm
 import time
-from src.elastic.queries import build_text_search_query, build_vector_search_query
+from src.elastic.queries import (
+    build_text_search_query, 
+    build_vector_search_query,
+    build_question_vector_knn_query,
+    build_text_vector_knn_query, 
+    build_question_text_vector_knn_query,
+    build_combined_vector_knn_query
+)
 from src.core.utils.logger import setup_logger
+from src.elastic.client import get_elasticsearch_client
+from src.core.config import ElasticsearchConfig
 
 logger = setup_logger(__name__)
 client = OpenAI()
@@ -182,19 +191,182 @@ def main():
         logger.log_info("Starting evaluation process")
         evaluator = GroundTruthEvaluator()
         
-        start_time = time.time()
+        # Load the ground truth data
         evaluator.load_ground_truth_data('data/output/ground-truth-data.csv')
         
-        hit_rate, mrr = evaluator.evaluate_query(
-            lambda q: build_text_search_query(query=q['question'], course=q['course'])
+        # Get the Elasticsearch client
+        es_client = get_elasticsearch_client()
+        
+        def execute_search(query_builder_func):
+            """Creates a function that builds and executes a search query.
+            
+            Args:
+                query_builder_func: Function that builds an Elasticsearch query
+                
+            Returns:
+                Function that takes a query dict and returns search results
+            """
+            def search_function(query_dict):
+                # Build the query using the provided builder function
+                es_query = query_builder_func(
+                    query=query_dict['question'], 
+                    course=query_dict.get('course')
+                )
+                
+                # Execute the query against Elasticsearch
+                response = es_client.search(
+                    index=ElasticsearchConfig.index_name,
+                    body=es_query
+                )
+                
+                # Extract and return the search results
+                return [hit['_source'] for hit in response['hits']['hits']]
+            
+            return search_function
+        
+        # Dictionary to store results of all search methods
+        all_results = {}
+        overall_start_time = time.time()
+        
+        # 1. Evaluate text search (baseline)
+        logger.log_info("Evaluating traditional text search...")
+        method_start_time = time.time()
+        text_search_function = execute_search(build_text_search_query)
+        text_hit_rate, text_mrr = evaluator.evaluate_query(text_search_function)
+        method_time_min = (time.time() - method_start_time) / 60
+        all_results["text_search"] = {
+            "hit_rate": text_hit_rate, 
+            "mrr": text_mrr,
+            "time_minutes": method_time_min
+        }
+        
+        logger.log_info(
+            "Text search evaluation results",
+            hit_rate=round(text_hit_rate, 3),
+            mrr=round(text_mrr, 3),
+            time_minutes=round(method_time_min, 2)
         )
         
-        total_time = (time.time() - start_time) * 1000
+        # 2. Evaluate vector search
+        logger.log_info("Evaluating vector search...")
+        method_start_time = time.time()
+        vector_search_function = execute_search(build_vector_search_query)
+        vector_hit_rate, vector_mrr = evaluator.evaluate_query(vector_search_function)
+        method_time_min = (time.time() - method_start_time) / 60
+        all_results["vector_search"] = {
+            "hit_rate": vector_hit_rate, 
+            "mrr": vector_mrr,
+            "time_minutes": method_time_min
+        }
+        
         logger.log_info(
-            "Evaluation completed successfully",
-            hit_rate=round(hit_rate, 3),
-            mrr=round(mrr, 3),
-            total_time_ms=round(total_time, 2)
+            "Vector search evaluation results",
+            hit_rate=round(vector_hit_rate, 3),
+            mrr=round(vector_mrr, 3),
+            time_minutes=round(method_time_min, 2)
+        )
+        
+        # 3. Evaluate question vector KNN search
+        logger.log_info("Evaluating question vector KNN search...")
+        method_start_time = time.time()
+        question_knn_function = execute_search(build_question_vector_knn_query)
+        q_knn_hit_rate, q_knn_mrr = evaluator.evaluate_query(question_knn_function)
+        method_time_min = (time.time() - method_start_time) / 60
+        all_results["question_knn"] = {
+            "hit_rate": q_knn_hit_rate, 
+            "mrr": q_knn_mrr,
+            "time_minutes": method_time_min
+        }
+        
+        logger.log_info(
+            "Question vector KNN search results",
+            hit_rate=round(q_knn_hit_rate, 3),
+            mrr=round(q_knn_mrr, 3),
+            time_minutes=round(method_time_min, 2)
+        )
+        
+        # 4. Evaluate text vector KNN search
+        logger.log_info("Evaluating text vector KNN search...")
+        method_start_time = time.time()
+        text_knn_function = execute_search(build_text_vector_knn_query)
+        t_knn_hit_rate, t_knn_mrr = evaluator.evaluate_query(text_knn_function)
+        method_time_min = (time.time() - method_start_time) / 60
+        all_results["text_knn"] = {
+            "hit_rate": t_knn_hit_rate, 
+            "mrr": t_knn_mrr,
+            "time_minutes": method_time_min
+        }
+        
+        logger.log_info(
+            "Text vector KNN search results",
+            hit_rate=round(t_knn_hit_rate, 3),
+            mrr=round(t_knn_mrr, 3),
+            time_minutes=round(method_time_min, 2)
+        )
+        
+        # 5. Evaluate question-text vector KNN search
+        logger.log_info("Evaluating question-text vector KNN search...")
+        method_start_time = time.time()
+        qt_knn_function = execute_search(build_question_text_vector_knn_query)
+        qt_knn_hit_rate, qt_knn_mrr = evaluator.evaluate_query(qt_knn_function)
+        method_time_min = (time.time() - method_start_time) / 60
+        all_results["question_text_knn"] = {
+            "hit_rate": qt_knn_hit_rate, 
+            "mrr": qt_knn_mrr,
+            "time_minutes": method_time_min
+        }
+        
+        logger.log_info(
+            "Question-text vector KNN search results",
+            hit_rate=round(qt_knn_hit_rate, 3),
+            mrr=round(qt_knn_mrr, 3),
+            time_minutes=round(method_time_min, 2)
+        )
+        
+        # 6. Evaluate combined vector KNN search
+        logger.log_info("Evaluating combined vector KNN search...")
+        method_start_time = time.time()
+        combined_knn_function = execute_search(build_combined_vector_knn_query)
+        combined_hit_rate, combined_mrr = evaluator.evaluate_query(combined_knn_function)
+        method_time_min = (time.time() - method_start_time) / 60
+        all_results["combined_knn"] = {
+            "hit_rate": combined_hit_rate, 
+            "mrr": combined_mrr,
+            "time_minutes": method_time_min
+        }
+        
+        logger.log_info(
+            "Combined vector KNN search results",
+            hit_rate=round(combined_hit_rate, 3),
+            mrr=round(combined_mrr, 3),
+            time_minutes=round(method_time_min, 2)
+        )
+        
+        total_time_min = (time.time() - overall_start_time) / 60
+        
+        # Create a formatted results table
+        logger.log_info(f"=== SEARCH METHOD COMPARISON (Total time: {round(total_time_min, 2)} minutes) ===")
+        
+        # Table header
+        header = f"{'Method':<20} | {'Hit Rate':^10} | {'MRR':^10} | {'Time (min)':^12}"
+        separator = f"{'-'*20} | {'-'*10} | {'-'*10} | {'-'*12}"
+        logger.log_info(header)
+        logger.log_info(separator)
+        
+        # Sort results by MRR (best performing first)
+        sorted_results = sorted(all_results.items(), key=lambda x: x[1]["mrr"], reverse=True)
+        
+        # Table rows
+        for method, metrics in sorted_results:
+            method_name = method.replace('_', ' ').title()
+            row = f"{method_name:<20} | {metrics['hit_rate']:^10.3f} | {metrics['mrr']:^10.3f} | {metrics['time_minutes']:^12.2f}"
+            logger.log_info(row)
+        
+        # Find the best method based on MRR
+        best_method = sorted_results[0]
+        logger.log_info(separator)
+        logger.log_info(
+            f"Best performing method: {best_method[0].replace('_', ' ').title()}"
         )
         
     except Exception as e:

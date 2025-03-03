@@ -7,7 +7,14 @@ from src.core.config import ElasticsearchConfig, OpenAIConfig
 from src.elastic.client import get_elasticsearch_client
 from src.core.utils.logger import setup_logger
 from src.rag.templates import CONTEXT_TEMPLATE, PROMPT_TEMPLATE
-from src.elastic.queries import build_text_search_query, build_vector_search_query
+from src.elastic.queries import (
+    build_text_search_query, 
+    build_vector_search_query,
+    build_question_vector_knn_query,
+    build_text_vector_knn_query,
+    build_question_text_vector_knn_query,
+    build_combined_vector_knn_query
+)
 
 logger = setup_logger(__name__)
 
@@ -15,6 +22,10 @@ logger = setup_logger(__name__)
 class SearchMethod(Enum):
     TEXT = "text"
     VECTOR = "vector"
+    QUESTION_KNN = "question_knn"
+    TEXT_KNN = "text_knn"
+    QUESTION_TEXT_KNN = "question_text_knn"
+    COMBINED_KNN = "combined_knn"
 
 
 class QABot:
@@ -23,11 +34,12 @@ class QABot:
     """
 
     def __init__(self, search_method: SearchMethod = SearchMethod.TEXT) -> None:
+        """Initialize the QA bot with required components."""
+        self.search_method = search_method
         self.elasticsearch_client = get_elasticsearch_client()
-        self.openai_client = OpenAI()
         self.es_config = ElasticsearchConfig()
         self.openai_config = OpenAIConfig()
-        self.search_method = search_method
+        self.openai_client = OpenAI(api_key=self.openai_config.open_api_key)
 
     def retrieve_documents(
         self, query: str, course: str, max_results: int | None = None
@@ -45,8 +57,19 @@ class QABot:
         """
         if self.search_method == SearchMethod.TEXT:
             search_query = build_text_search_query(query, course)
-        else:
+        elif self.search_method == SearchMethod.VECTOR:
             search_query = build_vector_search_query(query, course)
+        elif self.search_method == SearchMethod.QUESTION_KNN:
+            search_query = build_question_vector_knn_query(query, course)
+        elif self.search_method == SearchMethod.TEXT_KNN:
+            search_query = build_text_vector_knn_query(query, course)
+        elif self.search_method == SearchMethod.QUESTION_TEXT_KNN:
+            search_query = build_question_text_vector_knn_query(query, course)
+        elif self.search_method == SearchMethod.COMBINED_KNN:
+            search_query = build_combined_vector_knn_query(query, course)
+        else:
+            logger.log_warning(f"Unknown search method: {self.search_method}. Falling back to text search.")
+            search_query = build_text_search_query(query, course)
 
         try:
             response = self.elasticsearch_client.search(
