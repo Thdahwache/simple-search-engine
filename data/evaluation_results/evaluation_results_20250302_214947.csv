@@ -1,0 +1,7 @@
+Method,Description,Hit Rate,MRR,Time (min)
+Question-Text KNN,KNN search using combined question-text vector field,0.903,0.775,1.75
+Combined KNN,KNN search using all vector fields with script scoring,0.89,0.762,1.82
+Text Search,Traditional keyword-based search,0.827,0.714,0.62
+Vector Search,Basic vector similarity search,0.832,0.689,1.74
+Text KNN,KNN search using text vector field,0.832,0.689,1.77
+Question KNN,KNN search using question vector field,0.745,0.621,1.77

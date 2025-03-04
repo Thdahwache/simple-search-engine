@@ -1,0 +1,50 @@
+{
+  "timestamp": "20250302_214947",
+  "total_time_minutes": 9.467685095469157,
+  "methods_evaluated": 6,
+  "ground_truth_path": "data/output/ground-truth-data.csv",
+  "results": {
+    "text_search": {
+      "name": "Text Search",
+      "description": "Traditional keyword-based search",
+      "hit_rate": 0.8265822784810126,
+      "mrr": 0.713934599156119,
+      "time_minutes": 0.6163101514180501
+    },
+    "vector_search": {
+      "name": "Vector Search",
+      "description": "Basic vector similarity search",
+      "hit_rate": 0.8320675105485232,
+      "mrr": 0.6890295358649795,
+      "time_minutes": 1.7378610332806905
+    },
+    "question_knn": {
+      "name": "Question KNN",
+      "description": "KNN search using question vector field",
+      "hit_rate": 0.7453586497890295,
+      "mrr": 0.6206680731364278,
+      "time_minutes": 1.7726295987764995
+    },
+    "text_knn": {
+      "name": "Text KNN",
+      "description": "KNN search using text vector field",
+      "hit_rate": 0.8320675105485232,
+      "mrr": 0.6890295358649795,
+      "time_minutes": 1.7654889782269796
+    },
+    "question_text_knn": {
+      "name": "Question-Text KNN",
+      "description": "KNN search using combined question-text vector field",
+      "hit_rate": 0.9031645569620254,
+      "mrr": 0.7750703234880458,
+      "time_minutes": 1.753831672668457
+    },
+    "combined_knn": {
+      "name": "Combined KNN",
+      "description": "KNN search using all vector fields with script scoring",
+      "hit_rate": 0.890084388185654,
+      "mrr": 0.7615752461322087,
+      "time_minutes": 1.8214936971664428
+    }
+  }
+}
