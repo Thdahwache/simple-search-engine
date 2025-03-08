@@ -1,0 +1,449 @@
+---
+description: These rules are for python programming
+globs: *.py
+alwaysApply: false
+---
+code_organization:
+  directory_structure:
+    principles:
+      - "Flat is better than nested (but not always). Start with a simple structure and refactor as needed."
+      - "Use packages (directories with __init__.py) for logical grouping of modules."
+      - "Consider using a src directory to separate application code from project-level files."
+    project_templating:
+      cookiecutter:
+        description: "Cookiecutter is a command-line utility that creates projects from project templates, helping maintain consistent project structure across multiple projects."
+        benefits:
+          - "Ensures consistent project structure and setup"
+          - "Saves time on project initialization"
+          - "Encourages best practices through templates"
+          - "Customizable through template variables"
+        usage: "cookiecutter https://github.com/audreyfeldroy/cookiecutter-pypackage" or call the docs
+        popular_templates:
+          - "cookiecutter-pypackage: For Python packages"
+          - "cookiecutter-django: For Django projects"
+          - "cookiecutter-flask: For Flask applications"
+          - "cookiecutter-data-science: For data science projects"
+        custom_templates: "Organizations can create custom templates to enforce their own standards and practices"
+    recommended_structure: |
+      project_name/
+      ├── src/
+      │   ├── package_name/
+      │   │   ├── __init__.py
+      │   │   ├── module1.py
+      │   │   ├── module2.py
+      │   ├── main.py  # Entry point
+      ├── tests/
+      │   ├── __init__.py
+      │   ├── test_module1.py
+      │   ├── test_module2.py
+      ├── docs/
+      │   ├── conf.py
+      │   ├── index.rst
+      ├── .gitignore
+      ├── pyproject.toml
+      ├── README.md
+      ├── requirements.txt
+
+  file_naming:
+    modules: "Lowercase with underscores for readability (e.g., my_module.py)"
+    packages: "Lowercase (e.g., my_package). Avoid underscores unless necessary."
+    tests: "Start with test_ (e.g., test_my_module.py)"
+
+  module_organization:
+    principles:
+      - "Single Responsibility Principle: Each module should have a well-defined purpose."
+
+    imports:
+      order: "Standard library, third-party, local"
+      recommendations:
+        - "Prefer absolute imports (from my_package.module1 import function1)"
+        - "Use explicit relative imports when dealing with complex package layouts"
+
+    constants: "Define module-level constants in uppercase (e.g., MAX_ITERATIONS = 100)"
+
+    dunder_names: "Place __all__, __version__, etc. after docstring but before imports (except __future__)"
+
+    comments_documentation:
+      guidelines:
+        - "Use docstrings for all public functions, classes, and modules"
+        - "Add inline comments only for complex logic"
+        - "Keep comments up to date with code changes"
+        - "Use type hints instead of type comments"
+      examples:
+        good: |
+          def calculate_average(numbers: List[float]) -> float:
+              """Calculate the average of a list of numbers."""
+              return sum(numbers) / len(numbers)
+        bad: |
+          def calculate_average(numbers):  # numbers: list of float
+              # Calculate average by summing and dividing
+              return sum(numbers) / len(numbers)
+
+  component_architecture:
+    options:
+      - "Layered Architecture: Separate concerns into presentation, business logic, and data access"
+      - "Microservices: Break large systems into smaller, independent services"
+      - "Hexagonal/Clean Architecture: Decouple business logic from external dependencies"
+      - "Dependency Injection: Improve testability and reduce coupling"
+
+  code_splitting:
+    strategies:
+      - "By Functionality: Split code based on distinct functionalities"
+      - "By Layer: Separate presentation, business logic, and data access"
+      - "Lazy Loading: Use importlib.import_module() to load modules on demand"
+      - "Conditional Imports: Import modules only when needed"
+
+type_hints:
+  best_practices:
+    - "Use type annotations for function parameters, return values, and variables"
+    - "Use Optional[Type] for values that could be None"
+    - "Use Union[Type1, Type2] for values that could be of multiple types"
+    - "Use TypeVar for generic functions and classes"
+    - "Use Protocol for structural typing (duck typing)"
+  tools:
+    - "mypy: Static type checker for Python"
+    - "pyright: Fast type checker by Microsoft"
+    - "pyre: Type checker developed by Facebook"
+  guidelines:
+    - "Be pragmatic about type annotations - focus on public APIs and complex functions"
+    - "Use type: ignore sparingly and with specific error codes when necessary"
+    - "Consider using stub files (.pyi) for third-party libraries lacking annotations"
+
+common_patterns:
+  design_patterns:
+    singleton: "Restrict instantiation of a class to one object"
+    factory: "Create objects without specifying the exact class"
+    observer: "Define a one-to-many dependency for state change notification"
+    strategy: "Define a family of algorithms and make them interchangeable"
+    decorator: "Add responsibilities to objects dynamically"
+    context_manager: "Guarantees resources are properly cleaned up"
+
+  recommended_approaches:
+    data_validation: "Use pydantic or marshmallow for data validation and serialization"
+    configuration: "Use python-decouple, dynaconf or configparser for environment-specific settings"
+    logging: "Use the logging module with appropriate log levels and handlers"
+    cli: "Use argparse, click or typer for command-line interfaces"
+    async_programming: "Use asyncio for I/O-bound and concurrency problems"
+
+  anti_patterns:
+    god_class: "A class that does too much. Break it down into smaller, focused classes."
+    shotgun_surgery: "Making small changes to many different classes. Indicates poor cohesion."
+    spaghetti_code: "Unstructured and difficult-to-follow code. Refactor using well-defined functions."
+    duplicate_code: "Extract common code into reusable functions (DRY - Don't Repeat Yourself)."
+    magic_numbers: "Use named constants instead of hardcoded values."
+    callback_hell: "Avoid deeply nested callbacks in async code. Use async/await instead."
+    premature_optimization: "Don't optimize code before identifying bottlenecks."
+
+  state_management:
+    principles:
+      - "Prefer stateless functions where possible"
+      - "Use immutable data structures to prevent accidental modification"
+      - "Manage state explicitly using classes or data structures"
+      - "Avoid relying on global variables"
+      - "Use contextvars (Python 3.7+) for request-scoped state in async applications"
+      - "Consider dependency injection for complex state management"
+
+  error_handling:
+    patterns:
+      - "Catch specific exceptions rather than broad Exception or BaseException"
+      - "Use finally to ensure cleanup code is always executed"
+      - "Use context managers (with statements) for resource management"
+      - "Log exceptions with complete traceback information"
+      - "Raise exceptions with informative error messages"
+      - "Create custom exception classes for specific error conditions"
+      - "Avoid using exceptions for control flow"
+
+python_features:
+  modern_syntax:
+    f_strings: "Use f-strings for string formatting (f'{variable}') instead of .format() or %"
+    walrus_operator: "Use := for assignment expressions (Python 3.8+)"
+    pattern_matching: "Use match/case for structural pattern matching (Python 3.10+)"
+    dataclasses: "Use @dataclass for classes that primarily store data"
+    assignment_expressions: "Use assignment expressions to avoid repetition"
+    
+  async_features:
+    basics: "Use async def for coroutine functions and await for awaiting coroutines"
+    async_with: "Use async with for asynchronous context managers"
+    async_for: "Use async for for asynchronous iteration"
+    asyncio_best_practices:
+      - "Avoid blocking calls in coroutines"
+      - "Use asyncio.gather for concurrent coroutines"
+      - "Consider third-party libraries like asyncio, httpx, and aiohttp for async I/O"
+      - "Use asyncio.create_task for background tasks"
+      - "Be careful with task cancellation and exception handling"
+
+performance:
+  optimization_techniques:
+    profiling: "Use cProfile to identify performance bottlenecks"
+    data_structures: "Choose appropriate data structures (e.g., set for membership testing)"
+    comprehensions: "Use list comprehensions and generator expressions for efficiency"
+    vectorization: "Use NumPy for numerical computations with vectorized operations"
+    jit_compilation: "Consider Numba for performance-critical numerical code"
+    caching: "Implement caching with functools.lru_cache or Redis/Memcached"
+    string_concatenation: "Use ''.join(iterable) for efficient string concatenation"
+    variable_scope: "Accessing local variables is faster than global variables"
+    cython: "Use Cython to write C extensions for Python"
+
+  memory_management:
+    principles:
+      - "Understand Python's garbage collection mechanism"
+      - "Be mindful of object references and circular dependencies"
+      - "Use memory_profiler to identify memory leaks"
+      - "Use __slots__ in classes to reduce memory footprint"
+      - "Use generators for processing large datasets without loading them into memory"
+      - "Use the most efficient data types possible"
+
+  lazy_loading:
+    strategies:
+      - "Use importlib.import_module() to load modules on demand"
+      - "Load large datasets only when needed"
+      - "Use generators or coroutines to defer execution of code"
+
+security:
+  common_vulnerabilities:
+    sql_injection: "Use parameterized queries or ORMs to prevent SQL injection"
+    xss: "Sanitize user input and escape output to prevent XSS attacks"
+    csrf: "Use CSRF tokens to protect against CSRF attacks"
+    command_injection: "Avoid executing arbitrary commands based on user input"
+    path_traversal: "Validate file paths to prevent path traversal attacks"
+    dos: "Implement rate limiting and input validation to protect against DoS"
+    pickle_deserialization: "Avoid using pickle with untrusted data; use JSON or Protocol Buffers"
+    dependency_vulnerabilities: "Regularly audit and update dependencies"
+    hardcoded_secrets: "Never hardcode secrets; use environment variables or secure config files"
+
+  input_validation:
+    practices:
+      - "Validate input against a whitelist of allowed values"
+      - "Use regular expressions to validate input formats"
+      - "Ensure input data types are correct"
+      - "Limit the length of input strings"
+      - "Remove or escape potentially harmful characters"
+      - "Use libraries like pydantic, cerberus, or marshmallow"
+
+  authentication:
+    principles:
+      - "Use strong password hashing (bcrypt, Argon2)"
+      - "Implement multi-factor authentication (MFA)"
+      - "Use secure session management techniques"
+      - "Consider dedicated authentication services (Auth0, Okta)"
+
+  authorization:
+    techniques:
+      - "Implement role-based access control (RBAC)"
+      - "Use a permissions system to control resource access"
+      - "Enforce the principle of least privilege"
+      - "Use access tokens (JWTs) for authorization"
+
+  data_protection:
+    strategies:
+      - "Encrypt sensitive data at rest and in transit"
+      - "Mask sensitive data when displaying it"
+      - "Replace sensitive data with non-sensitive tokens"
+      - "Implement Data Loss Prevention (DLP) measures"
+      - "Maintain regular backups and disaster recovery plans"
+
+  secure_api:
+    practices:
+      - "Always use HTTPS for API communication"
+      - "Use API keys for authentication"
+      - "Use OAuth 2.0 for delegated authorization"
+      - "Validate all API requests before processing"
+      - "Implement rate limiting to prevent abuse"
+      - "Use a Web Application Firewall (WAF)"
+
+testing:
+  unit_testing:
+    strategies:
+      - "Test individual functions, classes, or modules in isolation"
+      - "Consider Test-Driven Development (TDD)"
+      - "Aim for high test coverage"
+      - "Use appropriate assertion methods"
+      - "Test boundary conditions and edge cases"
+      - "Test exception handling"
+    frameworks:
+      - "pytest (recommended)"
+      - "unittest (standard library)"
+
+  integration_testing:
+    approaches:
+      - "Test interactions between different modules"
+      - "Test database interactions"
+      - "Test API endpoints"
+      - "Mock external services during tests"
+      - "Focus on key workflows"
+
+  end_to_end_testing:
+    principles:
+      - "Test the entire system from end to end"
+      - "Write tests from the user's perspective"
+      - "Use browser automation tools (Selenium, Playwright)"
+      - "Simulate real-world scenarios"
+      - "Focus on critical paths"
+
+  test_organization:
+    practices:
+      - "Keep tests in a separate tests directory"
+      - "Mirror the source code structure in the test directory"
+      - "Create test modules for each source module"
+      - "Use test classes to group related tests"
+      - "Use a test runner (pytest or unittest)"
+      - "Utilize fixtures for setup and teardown"
+
+  mocking:
+    techniques:
+      - "Use unittest.mock for mocking and stubbing"
+      - "Use patch to replace objects with mocks"
+      - "Define side effects for mocks to simulate scenarios"
+      - "Mock external dependencies (databases, APIs, file systems)"
+      - "Use dependency injection to improve testability"
+
+common_pitfalls:
+  frequent_mistakes:
+    mutable_defaults: "Avoid using mutable default arguments in function definitions"
+    variable_scope: "Be aware of variable scope in nested functions"
+    equality_vs_identity: "Use == for value comparison and is for object identity"
+    try_blocks: "Keep try blocks as small as possible"
+    exception_handling: "Never silence exceptions without handling or logging them"
+    indentation: "Be careful with indentation, as it defines scope in Python"
+    virtual_environments: "Always use virtual environments to manage dependencies"
+
+  edge_cases:
+    floating_point: "Be aware of the limitations of floating-point arithmetic"
+    unicode: "Handle Unicode strings carefully, especially in Python 3"
+    file_encoding: "Specify file encoding when reading and writing files"
+    time_zones: "Handle time zones correctly using libraries like pytz or dateutil"
+    resource_limits: "Be aware of system resource limits (file handles, memory)"
+
+  version_issues:
+    python_versions: "Be aware of syntax and feature differences between Python versions"
+    library_compatibility: "Ensure libraries are compatible with your Python version"
+    deprecated_features: "Avoid using deprecated features"
+    target_versions: "Specify the minimum supported Python version in your project"
+
+  compatibility:
+    operating_systems: "Test code on different operating systems (Windows, macOS, Linux)"
+    python_implementations: "Consider compatibility with different Python implementations"
+    database_versions: "Ensure compatibility with different database versions"
+    external_libraries: "Be aware of compatibility issues with external libraries"
+
+  debugging:
+    strategies:
+      - "Use pdb or ipdb for interactive debugging"
+      - "Use logging to track program execution"
+      - "Use print statements for simple debugging"
+      - "Use assertions to check for expected conditions"
+      - "Use profilers to identify performance bottlenecks"
+      - "Use code analysis tools (pylint, flake8)"
+      - "Use remote debugging tools for code on remote servers"
+
+tooling:
+  development_tools:
+    ides:
+      - "PyCharm (full-featured IDE)"
+      - "VS Code with Python extension (lightweight but powerful)"
+      - "Sublime Text with Python packages"
+    virtual_environments:
+      - "venv (built-in)"
+      - "virtualenv (third-party)"
+      - "conda (for scientific computing)"
+      - "pipenv (combines pip and virtualenv)"
+    package_managers:
+      - "pip (standard package installer)"
+      - "uv (fast Rust-based package installer)"
+      - "poetry (modern dependency management)"
+      - "pdm (modern Python package manager)"
+      - "pip-tools (for dependency pinning)"
+      - "conda (for scientific packages)"
+    version_managers:
+      - "pyenv (manage multiple Python versions)"
+      - "asdf (manage multiple language versions)"
+    debuggers:
+      - "pdb (standard library)"
+      - "ipdb (improved interactive debugger)"
+      - "IDE debuggers"
+    profilers:
+      - "cProfile (built-in)"
+      - "memory_profiler"
+      - "py-spy (sampling profiler)"
+    linters:
+      - "pylint (comprehensive)"
+      - "flake8 (faster, less opinionated)"
+      - "ruff (very fast Rust-based linter)"
+    formatters:
+      - "black (opinionated, minimal configuration)"
+      - "autopep8 (follows PEP 8)"
+      - "YAPF (highly configurable)"
+    static_analyzers:
+      - "mypy (type checking)"
+      - "pyright (fast type checking)"
+      - "bandit (security-focused)"
+    notebooks:
+      - "Jupyter Notebook"
+      - "Jupyter Lab"
+      - "Google Colab"
+
+  build_configuration:
+    practices:
+      - "Use pyproject.toml for build configuration (PEP 518, PEP 621)"
+      - "Use setup.py for legacy projects"
+      - "Specify dependencies in requirements.txt, pyproject.toml, or setup.py"
+      - "Use virtual environments to isolate project dependencies"
+      - "Pin dependencies for reproducible builds"
+
+  linting_formatting:
+    practices:
+      - "Adhere to PEP 8 style guidelines"
+      - "Use linters to enforce code style and detect problems"
+      - "Use formatters to automatically format code"
+      - "Use pre-commit hooks to run linters and formatters"
+      - "Maintain a consistent code style throughout the project"
+    configs:
+      - ".flake8 or setup.cfg for flake8 configuration"
+      - "pyproject.toml for black configuration"
+      - "mypy.ini or pyproject.toml for mypy configuration"
+      - ".pre-commit-config.yaml for pre-commit hooks"
+
+  deployment:
+    strategies:
+      - "Deploy applications in virtual environments"
+      - "Install dependencies using requirements.txt or poetry"
+      - "Use process managers (systemd, Supervisor, Docker)"
+      - "Use web servers (Gunicorn, uWSGI) for web applications"
+      - "Implement load balancing for high-traffic applications"
+      - "Use containerization (Docker)"
+      - "Use Infrastructure as Code (Terraform, CloudFormation)"
+
+  containerization:
+    practices:
+      - "Use multi-stage builds to minimize image size"
+      - "Don't run containers as root"
+      - "Pin base image versions"
+      - "Use virtual environments inside containers"
+      - "Properly handle signals for clean shutdown"
+      - "Set appropriate resource limits"
+
+  ci_cd:
+    principles:
+      - "Automatically build and test code on every commit"
+      - "Automate deployment to staging and production"
+      - "Use CI/CD tools (GitHub Actions, GitLab CI, Jenkins)"
+      - "Include automated tests in the CI/CD pipeline"
+      - "Integrate code analysis tools into the pipeline"
+      - "Automate deployments to reduce manual errors"
+    configs:
+      - ".github/workflows for GitHub Actions"
+      - ".gitlab-ci.yml for GitLab CI"
+      - "Jenkinsfile for Jenkins"
+
+standard_library:
+  underused_modules:
+    collections: "Specialized container datatypes (defaultdict, Counter, deque)"
+    itertools: "Functions for efficient iteration (combinations, permutations, groupby)"
+    functools: "Higher-order functions (lru_cache, partial, reduce)"
+    contextlib: "Utilities for context managers (contextmanager, suppress)"
+    pathlib: "Object-oriented filesystem paths (preferred over os.path)"
+    concurrent: "Asynchronous execution (ThreadPoolExecutor, ProcessPoolExecutor)"
+    dataclasses: "Data classes with automatically added special methods"
+    enum: "Enumeration types"
+    typing: "Support for type hints"
+    secrets: "Generate secure random numbers for security purposes"

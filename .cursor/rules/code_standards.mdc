@@ -1,0 +1,200 @@
+---
+description: Code formatting and style guidelines
+globs:
+  - "**/*.py"
+---
+
+# Code Standards
+
+## Formatting Tools
+
+1. Black (88 chars)
+2. Ruff for linting
+3. Pre-commit hooks
+
+## Import Organization
+
+```python
+# Standard library imports
+import os
+import logging
+from typing import List, Dict, Optional
+from pathlib import Path
+from datetime import datetime, date
+from decimal import Decimal
+
+# Third-party imports
+import pandas as pd
+import numpy as np
+import streamlit as st
+from pydantic import BaseModel, Field
+from plotly import graph_objects as go
+
+# Local imports (absolute imports preferred)
+from src.core import config
+from src.schemas import models
+from src.validators import input_validation
+```
+
+## Function Definitions
+
+```python
+def process_data(
+    df: pd.DataFrame,
+    columns: List[str],
+    *,  # Force keyword arguments after this point
+    threshold: float = 0.5,
+    metadata: Optional[dict] = None
+) -> pd.DataFrame:
+    """Process DataFrame applying transformations.
+    
+    Args:
+        df: Input DataFrame to process
+        columns: List of columns to process
+        threshold: Cutoff value for processing (default: 0.5)
+        metadata: Optional metadata dictionary
+        
+    Returns:
+        pd.DataFrame: Processed DataFrame with transformed data
+        
+    Raises:
+        ValueError: If specified columns don't exist in DataFrame
+        TypeError: If input types are invalid
+    """
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("Input must be a pandas DataFrame")
+        
+    if not all(col in df.columns for col in columns):
+        raise ValueError(f"Invalid columns: {set(columns) - set(df.columns)}")
+        
+    return df[columns].copy()
+```
+
+## Class Definitions
+
+```python
+@dataclass
+class Employee:
+    """Employee data model.
+    
+    Attributes:
+        id: Unique employee identifier
+        name: Full name of the employee
+        department: Department name
+        hire_date: Date of hiring
+        skills: List of employee skills
+        manager_id: Optional ID of the employee's manager
+    """
+    id: int
+    name: str
+    department: str
+    hire_date: date
+    skills: List[str]
+    manager_id: Optional[int] = None
+    
+    def is_manager(self) -> bool:
+        """Check if employee is a manager."""
+        return self.manager_id is None
+```
+
+## Variable Naming
+
+1. Use descriptive names that reflect purpose
+2. Follow Python naming conventions:
+   - `snake_case` for functions and variables
+   - `PascalCase` for classes
+   - `UPPER_CASE` for constants
+3. Avoid abbreviations unless commonly used
+
+Examples:
+```python
+# Good
+employee_count = 0
+total_salary = calculate_total_salary()
+MAX_RETRIES = 3
+
+# Bad
+emp_cnt = 0
+tot_sal = calc_tot_sal()
+maxret = 3
+```
+
+## Constants and Configuration
+
+```python
+# Constants should be UPPER_CASE and descriptive
+MONTHS: Final[List[str]] = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+]
+
+# Configuration values should be in settings
+SLA_REFERENCES = {
+    "tech": 50,
+    "non_tech": 34,
+    "commercial": 29
+}
+
+# Use TypedDict for structured constants
+PERFORMANCE_CONFIG = {
+    "categories": ["vol", "invol"],
+    "suffixes": {
+        "_on_track": "On Track",
+        "_exceeded": "Exceeded Expectations",
+        "_outstanding": "Outstanding Performance",
+    },
+}
+```
+
+## Comments and Documentation
+
+1. Use docstrings for all public functions, classes, and modules
+2. Add inline comments only for complex logic
+3. Keep comments up to date with code changes
+4. Use type hints instead of type comments
+
+```python
+# Good
+def calculate_average(numbers: List[float]) -> float:
+    """Calculate the average of a list of numbers."""
+    return sum(numbers) / len(numbers)
+
+# Bad
+def calculate_average(numbers):  # numbers: list of float
+    # Calculate average by summing and dividing
+    return sum(numbers) / len(numbers)
+```
+
+## Code Organization
+
+1. Group related functionality in modules
+2. Use clear file and directory names
+3. Keep files focused and manageable
+4. Follow the project structure
+
+Example module organization:
+```
+src/pages/utils/
+├── pagina_1/
+│   ├── __init__.py
+│   ├── planejamento.py
+│   └── turnover.py
+├── pagina_2/
+│   ├── __init__.py
+│   └── highlights.py
+└── semaforo/
+    ├── __init__.py
+    ├── kpi_falai_funcoes.py
+    └── kpi_turnover_funcoes.py
+```
+
+## Best Practices
+
+1. Use list/dict comprehensions when appropriate
+2. Prefer explicit over implicit
+3. Follow the DRY principle (Don't Repeat Yourself)
+4. Use meaningful variable names
+5. Keep functions focused and small
+6. Use type hints consistently
+7. Handle errors appropriately
+8. Write testable code 
